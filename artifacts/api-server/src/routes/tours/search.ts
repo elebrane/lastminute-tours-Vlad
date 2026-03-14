@@ -12,18 +12,19 @@ router.post("/", async (req, res) => {
       return;
     }
 
-    if (!budget || typeof budget !== "number" || budget <= 0) {
+    const budgetNum = Number(budget);
+    if (!budgetNum || budgetNum <= 0) {
       res.status(400).json({ error: "BAD_REQUEST", message: "budget must be a positive number" });
       return;
     }
 
-    const rawTours = await searchLevelTravelTours(departureCity, budget, adults);
+    const { tours: rawTours, source } = await searchLevelTravelTours(departureCity, budgetNum, adults);
 
     const topTours = rawTours.slice(0, 3);
 
     const toursWithDescriptions = await Promise.all(
       topTours.map(async (tour) => {
-        const { aiDescription, aiRecommendation } = await generateTourDescription(
+        const { aiDescription, aiRecommendation, aiProvider } = await generateTourDescription(
           tour,
           departureCity,
           tour.nights
@@ -32,6 +33,7 @@ router.post("/", async (req, res) => {
           ...tour,
           aiDescription,
           aiRecommendation,
+          aiProvider,
         };
       })
     );
@@ -40,8 +42,9 @@ router.post("/", async (req, res) => {
       tours: toursWithDescriptions,
       searchId: Date.now().toString(),
       departureCity,
-      budget,
+      budget: budgetNum,
       totalFound: rawTours.length,
+      dataSource: source,
     });
   } catch (err) {
     console.error("Tour search error:", err);
