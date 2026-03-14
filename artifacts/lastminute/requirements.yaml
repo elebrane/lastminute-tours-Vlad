@@ -1,0 +1,18 @@
+packages:
+  "framer-motion": "For fluid card entry animations and page transitions"
+  "date-fns": "For formatting departure and return dates nicely in the UI"
+  "lucide-react": "For beautiful crisp iconography across the interface"
+  "clsx": "For conditional class name merging"
+  "tailwind-merge": "For merging tailwind classes safely"
+
+images:
+  - path: "artifacts/lastminute/public/images/hero-bg.png"
+    description: "A vibrant, modern, abstract gradient mesh background combining warm coral, sunset orange, and soft magenta with subtle light leaks. Smooth, premium travel startup aesthetic."
+    aspect_ratio: "16:9"
+  - path: "artifacts/lastminute/public/images/logo.png"
+    description: "A minimal, modern geometric logo mark for a travel startup, shaped like a location pin morphing into a paper plane, vibrant coral and orange gradient on a transparent background."
+    aspect_ratio: "1:1"
+
+notes:
+  - "React Query hooks are imported from @workspace/api-client-react as specified"
+  - "API uses exact generated types from the workspace"

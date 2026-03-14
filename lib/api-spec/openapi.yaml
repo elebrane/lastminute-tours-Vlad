@@ -1,15 +1,16 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: LastMinute Tours API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: tours
+    description: Tour search operations
 paths:
   /healthz:
     get:
@@ -24,6 +25,50 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /tours/search:
+    post:
+      operationId: searchTours
+      tags: [tours]
+      summary: Search last-minute tours
+      description: Search for tours departing within 7 days from a given city within a budget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TourSearchRequest"
+      responses:
+        "200":
+          description: Top 3 tour results with AI descriptions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TourSearchResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /tours/cities:
+    get:
+      operationId: getDepartureCities
+      tags: [tours]
+      summary: Get available departure cities
+      description: Returns list of supported departure cities
+      responses:
+        "200":
+          description: List of departure cities
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CitiesResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +78,127 @@ components:
           type: string
       required:
         - status
-
+    TourSearchRequest:
+      type: object
+      properties:
+        departureCity:
+          type: string
+          description: City of departure (e.g. "Москва")
+        budget:
+          type: number
+          description: Maximum budget per person in rubles
+        adults:
+          type: integer
+          description: Number of adults
+          default: 2
+      required:
+        - departureCity
+        - budget
+    Tour:
+      type: object
+      properties:
+        id:
+          type: string
+        destination:
+          type: string
+          description: Destination country and city
+        country:
+          type: string
+        city:
+          type: string
+        hotel:
+          type: string
+        stars:
+          type: integer
+        departureDate:
+          type: string
+          description: ISO date string
+        returnDate:
+          type: string
+          description: ISO date string
+        nights:
+          type: integer
+        price:
+          type: number
+          description: Price per person in rubles
+        totalPrice:
+          type: number
+          description: Total price for all adults in rubles
+        mealType:
+          type: string
+          description: Meal type (e.g. "Всё включено")
+        imageUrl:
+          type: string
+        aiDescription:
+          type: string
+          description: AI-generated description of what to see and whether to book
+        aiRecommendation:
+          type: string
+          description: Short AI verdict - стоит или нет
+      required:
+        - id
+        - destination
+        - country
+        - city
+        - hotel
+        - stars
+        - departureDate
+        - returnDate
+        - nights
+        - price
+        - totalPrice
+        - mealType
+        - aiDescription
+        - aiRecommendation
+    TourSearchResponse:
+      type: object
+      properties:
+        tours:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tour"
+        searchId:
+          type: string
+        departureCity:
+          type: string
+        budget:
+          type: number
+        totalFound:
+          type: integer
+      required:
+        - tours
+        - departureCity
+        - budget
+        - totalFound
+    CitiesResponse:
+      type: object
+      properties:
+        cities:
+          type: array
+          items:
+            $ref: "#/components/schemas/City"
+      required:
+        - cities
+    City:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        nameEn:
+          type: string
+      required:
+        - id
+        - name
+        - nameEn
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - error
+        - message
